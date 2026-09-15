@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "Ian Carlo Manoza",
+    "studentNumber": "202403620",
+    "course": "BS Information Technology",
+    "year": "3rd Year",
+    "gender": "Male"
+  },
+  {
+    "id": 2,
+    "name": "Charlie Kirk",
+    "studentNumber": "202403621",
+    "course": "BS Information Technology",
+    "year": "3rd Year",
+    "gender": "Male"
+  }
+]
