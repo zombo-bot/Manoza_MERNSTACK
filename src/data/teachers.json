@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Diwata Pares",
+    "specialization": "Cookery",
+    "department": "Home Economics",
+    "sex": "Male"
+  },
+  {
+    "id": 2,
+    "name": "Rene Butterbonia",
+    "specialization": "Basketball and Swimming",
+    "department": "Sports Education",
+    "sex": "Female"
+  }
+]
