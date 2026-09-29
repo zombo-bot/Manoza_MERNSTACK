@@ -1,6 +1,47 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+const departmentSpecializations = {
+  DIT: [
+    "Information Technology",
+    "Computer Science",
+    "Software Development",
+    "Web Development",
+    "Networking",
+    "Database Management",
+    "Cybersecurity",
+  ],
+
+  CEIT: [
+    "Computer Engineering",
+    "Electronics",
+    "Embedded Systems",
+    "Computer Hardware",
+    "Digital Systems",
+    "Robotics",
+  ],
+
+  DTE: [
+    "Mathematics",
+    "Science",
+    "English",
+    "Filipino",
+    "Social Studies",
+  ],
+
+  DPE: [
+    "Physical Education",
+    "Sports Science",
+    "Health Education",
+  ],
+
+  DAS: [
+    "Music",
+    "Art",
+    "Performing Arts",
+  ],
+};
+
 function AddTeacher() {
   const navigate = useNavigate();
 
@@ -17,6 +58,11 @@ function AddTeacher() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+
+      // Reset specialization when department changes
+      ...(name === "department" && {
+        specialization: "",
+      }),
     }));
   };
 
@@ -24,7 +70,7 @@ function AddTeacher() {
     e.preventDefault();
 
     try {
-      // Get existing teachers so we can create the next ID
+      // Get existing teachers
       const response = await fetch("http://localhost:5000/api/teachers");
 
       if (!response.ok) {
@@ -33,9 +79,10 @@ function AddTeacher() {
 
       const teachers = await response.json();
 
+      // Generate next ID
       const newId =
         teachers.length > 0
-          ? Math.max(...teachers.map((teacher) => teacher.id)) + 1
+          ? Math.max(...teachers.map((teacher) => Number(teacher.id))) + 1
           : 1;
 
       const newTeacher = {
@@ -43,7 +90,7 @@ function AddTeacher() {
         ...formData,
       };
 
-      // Save teacher to MongoDB
+      // Save teacher
       const saveResponse = await fetch(
         "http://localhost:5000/api/teachers",
         {
@@ -59,16 +106,21 @@ function AddTeacher() {
         throw new Error("Failed to save teacher");
       }
 
-      // Go back to Teachers page
       navigate("/teachers");
     } catch (error) {
       console.error("Error saving teacher:", error);
     }
   };
 
+  // Get specializations for selected department
+  const specializations =
+    departmentSpecializations[formData.department] || [];
+
   return (
     <div className="container">
       <div className="form-card">
+
+        {/* HEADER */}
         <div className="form-header">
           <div>
             <h1>Add Teacher</h1>
@@ -76,67 +128,112 @@ function AddTeacher() {
           </div>
 
           <Link className="back-link" to="/teachers">
-            Back to Teachers
+            ← Back to Teachers
           </Link>
         </div>
 
+        {/* FORM */}
         <form onSubmit={handleSubmit} className="teacher-form">
+
+          {/* NAME */}
           <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+            <label htmlFor="name">
+              Full Name
+            </label>
 
             <input
               type="text"
               id="name"
               name="name"
-              placeholder="Enter full name"
+              placeholder="e.g. Juan Dela Cruz"
               value={formData.name}
               onChange={handleChange}
               required
             />
           </div>
 
+          {/* DEPARTMENT */}
           <div className="form-group">
-            <label htmlFor="department">Department</label>
+            <label htmlFor="department">
+              Department
+            </label>
 
-            <input
-              type="text"
+            <select
               id="department"
               name="department"
-              placeholder="Enter department (e.g. DIT, CEIT)"
               value={formData.department}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">
+                Select department
+              </option>
+
+              <option value="DIT">
+                DIT - Department of Information Technology
+              </option>
+
+              <option value="CEIT">
+                CEIT - Computer Engineering / IT
+              </option>
+
+              <option value="DTE">
+                DTE - Department of Teacher Education
+              </option>
+
+              <option value="DPE">
+                DPE - Department of Physical Education
+              </option>
+
+              <option value="DAS">
+                DAS - Department of Arts and Sciences
+              </option>
+            </select>
           </div>
 
+          {/* SPECIALIZATION */}
           <div className="form-group">
-            <label htmlFor="specialization">Specialization</label>
+            <label htmlFor="specialization">
+              Specialization
+            </label>
 
             <select
               id="specialization"
               name="specialization"
               value={formData.specialization}
               onChange={handleChange}
+              disabled={!formData.department}
               required
             >
-              <option value="">Select specialization</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Science">Science</option>
-              <option value="English">English</option>
-              <option value="Filipino">Filipino</option>
-              <option value="Social Studies">Social Studies</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Physical Education">
-                Physical Education
+              <option value="">
+                {!formData.department
+                  ? "Select a department first"
+                  : "Select specialization"}
               </option>
-              <option value="Music">Music</option>
-              <option value="Art">Art</option>
-              <option value="IT">Information Technology</option>
+
+              {specializations.map((specialization) => (
+                <option
+                  key={specialization}
+                  value={specialization}
+                >
+                  {specialization}
+                </option>
+              ))}
             </select>
+
+            {formData.department && (
+              <small className="form-hint">
+                Showing specializations available for{" "}
+                <strong>{formData.department}</strong>.
+              </small>
+            )}
           </div>
 
+          {/* SEX */}
           <div className="form-group">
-            <label htmlFor="sex">Sex</label>
+            <label htmlFor="sex">
+              Sex
+            </label>
 
             <select
               id="sex"
@@ -150,15 +247,23 @@ function AddTeacher() {
             </select>
           </div>
 
+          {/* ACTIONS */}
           <div className="form-actions">
-            <Link className="button button-secondary" to="/teachers">
+            <Link
+              className="button button-secondary"
+              to="/teachers"
+            >
               Cancel
             </Link>
 
-            <button type="submit" className="button">
+            <button
+              type="submit"
+              className="button"
+            >
               Add Teacher
             </button>
           </div>
+
         </form>
       </div>
     </div>
@@ -166,3 +271,4 @@ function AddTeacher() {
 }
 
 export default AddTeacher;
+
