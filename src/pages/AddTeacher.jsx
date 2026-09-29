@@ -2,17 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const departmentSpecializations = {
-  DIT: [
-    "Information Technology",
-    "Computer Science",
-    "Software Development",
-    "Web Development",
-    "Networking",
-    "Database Management",
-    "Cybersecurity",
-  ],
 
   CEIT: [
+    "Information Technology",
     "Computer Engineering",
     "Electronics",
     "Embedded Systems",
@@ -21,7 +13,7 @@ const departmentSpecializations = {
     "Robotics",
   ],
 
-  DTE: [
+  CGS: [
     "Mathematics",
     "Science",
     "English",
@@ -29,13 +21,13 @@ const departmentSpecializations = {
     "Social Studies",
   ],
 
-  DPE: [
+  CSPEAR: [
     "Physical Education",
     "Sports Science",
     "Health Education",
   ],
 
-  DAS: [
+  CAS: [
     "Music",
     "Art",
     "Performing Arts",
@@ -59,7 +51,6 @@ function AddTeacher() {
       ...prev,
       [name]: value,
 
-      // Reset specialization when department changes
       ...(name === "department" && {
         specialization: "",
       }),
@@ -70,7 +61,6 @@ function AddTeacher() {
     e.preventDefault();
 
     try {
-      // Get existing teachers
       const response = await fetch("http://localhost:5000/api/teachers");
 
       if (!response.ok) {
@@ -79,7 +69,6 @@ function AddTeacher() {
 
       const teachers = await response.json();
 
-      // Generate next ID
       const newId =
         teachers.length > 0
           ? Math.max(...teachers.map((teacher) => Number(teacher.id))) + 1
@@ -90,7 +79,6 @@ function AddTeacher() {
         ...formData,
       };
 
-      // Save teacher
       const saveResponse = await fetch(
         "http://localhost:5000/api/teachers",
         {
@@ -112,7 +100,6 @@ function AddTeacher() {
     }
   };
 
-  // Get specializations for selected department
   const specializations =
     departmentSpecializations[formData.department] || [];
 
@@ -120,7 +107,6 @@ function AddTeacher() {
     <div className="container">
       <div className="form-card">
 
-        {/* HEADER */}
         <div className="form-header">
           <div>
             <h1>Add Teacher</h1>
@@ -132,10 +118,8 @@ function AddTeacher() {
           </Link>
         </div>
 
-        {/* FORM */}
         <form onSubmit={handleSubmit} className="teacher-form">
 
-          {/* NAME */}
           <div className="form-group">
             <label htmlFor="name">
               Full Name
@@ -145,14 +129,13 @@ function AddTeacher() {
               type="text"
               id="name"
               name="name"
-              placeholder="e.g. Juan Dela Cruz"
+              placeholder="e.g. Rene Butterbonia"
               value={formData.name}
               onChange={handleChange}
               required
             />
           </div>
 
-          {/* DEPARTMENT */}
           <div className="form-group">
             <label htmlFor="department">
               Department
@@ -167,10 +150,6 @@ function AddTeacher() {
             >
               <option value="">
                 Select department
-              </option>
-
-              <option value="DIT">
-                DIT - Department of Information Technology
               </option>
 
               <option value="CEIT">
@@ -191,7 +170,6 @@ function AddTeacher() {
             </select>
           </div>
 
-          {/* SPECIALIZATION */}
           <div className="form-group">
             <label htmlFor="specialization">
               Specialization
