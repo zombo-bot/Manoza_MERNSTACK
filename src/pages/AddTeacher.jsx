@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import initialTeachers from "../data/teachers.json";
 
 function AddTeacher() {
   const navigate = useNavigate();
@@ -21,39 +20,50 @@ function AddTeacher() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get existing teachers from localStorage
-    const savedTeachers = localStorage.getItem("teachers");
+    try {
+      // Get existing teachers so we can create the next ID
+      const response = await fetch("http://localhost:5000/api/teachers");
 
-    const teachers = savedTeachers
-      ? JSON.parse(savedTeachers)
-      : initialTeachers;
+      if (!response.ok) {
+        throw new Error("Failed to fetch teachers");
+      }
 
-    // Generate a new ID
-    const newId =
-      teachers.length > 0
-        ? Math.max(...teachers.map((teacher) => teacher.id)) + 1
-        : 1;
+      const teachers = await response.json();
 
-    // Create the new teacher
-    const newTeacher = {
-      id: newId,
-      ...formData,
-    };
+      const newId =
+        teachers.length > 0
+          ? Math.max(...teachers.map((teacher) => teacher.id)) + 1
+          : 1;
 
-    // Add new teacher to the existing data
-    const updatedTeachers = [newTeacher, ...teachers];
+      const newTeacher = {
+        id: newId,
+        ...formData,
+      };
 
-    // Save updated data
-    localStorage.setItem(
-      "teachers",
-      JSON.stringify(updatedTeachers)
-    );
+      // Save teacher to MongoDB
+      const saveResponse = await fetch(
+        "http://localhost:5000/api/teachers",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newTeacher),
+        }
+      );
 
-    // Go back to Teacher List
-    navigate("/teachers");
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save teacher");
+      }
+
+      // Go back to Teachers page
+      navigate("/teachers");
+    } catch (error) {
+      console.error("Error saving teacher:", error);
+    }
   };
 
   return (
@@ -86,35 +96,43 @@ function AddTeacher() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="specialization">
-              Specialization
-            </label>
+            <label htmlFor="department">Department</label>
 
             <input
               type="text"
-              id="specialization"
-              name="specialization"
-              placeholder="e.g. Mathematics"
-              value={formData.specialization}
+              id="department"
+              name="department"
+              placeholder="Enter department (e.g. DIT, CEIT)"
+              value={formData.department}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="department">
-              Department
-            </label>
+            <label htmlFor="specialization">Specialization</label>
 
-            <input
-              type="text"
-              id="department"
-              name="department"
-              placeholder="e.g. Science"
-              value={formData.department}
+            <select
+              id="specialization"
+              name="specialization"
+              value={formData.specialization}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">Select specialization</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Science">Science</option>
+              <option value="English">English</option>
+              <option value="Filipino">Filipino</option>
+              <option value="Social Studies">Social Studies</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Physical Education">
+                Physical Education
+              </option>
+              <option value="Music">Music</option>
+              <option value="Art">Art</option>
+              <option value="IT">Information Technology</option>
+            </select>
           </div>
 
           <div className="form-group">
@@ -133,10 +151,7 @@ function AddTeacher() {
           </div>
 
           <div className="form-actions">
-            <Link
-              className="button button-secondary"
-              to="/teachers"
-            >
+            <Link className="button button-secondary" to="/teachers">
               Cancel
             </Link>
 
